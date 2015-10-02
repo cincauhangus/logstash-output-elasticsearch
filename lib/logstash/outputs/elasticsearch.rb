@@ -212,6 +212,10 @@ class LogStash::Outputs::ElasticSearch < LogStash::Outputs::Base
   # Create a new document with this parameter as json string if `document_id` doesn't exists
   config :upsert, :validate => :string, :default => ""
 
+  # Set the timeout for network operations and requests sent Elasticsearch. If
+  # a timeout occurs, the request will be retried.
+  config :timeout, :valudate => :number
+
   public
   def register
     @hosts = Array(@hosts)
@@ -231,6 +235,7 @@ class LogStash::Outputs::ElasticSearch < LogStash::Outputs::Base
       :sniffing_delay => @sniffing_delay
     }
 
+    common_options[:timeout] = @timeout if @timeout
     client_settings[:path] = "/#{@path}/".gsub(/\/+/, "/") # Normalize slashes
     @logger.debug? && @logger.debug("Normalizing http path", :path => @path, :normalized => client_settings[:path])
 
